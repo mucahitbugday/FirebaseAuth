@@ -11,11 +11,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     width: '100%',
   },
-  pageTitle: {
-    fontWeight: '700',
-    marginBottom: 24,
-    marginTop: 16,
-  },
   profileHeader: {
     alignItems: 'center',
     marginBottom: 30,

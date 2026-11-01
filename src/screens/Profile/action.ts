@@ -1,11 +1,35 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
 import { Linking, useColorScheme } from 'react-native';
-import { createUserWithEmailAndPassword, deleteUser, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile, type User, } from '@react-native-firebase/auth';
+import {
+  deleteUser,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithCredential,
+  signOut,
+  type User,
+} from '@react-native-firebase/auth';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+} from '@react-native-google-signin/google-signin';
 import { Icon, MD3DarkTheme, MD3LightTheme, Switch, Text, } from 'react-native-paper';
 import type { ListItemProps } from 'react-native-paper';
 import { View } from 'react-native';
+import googleServicesConfig from '../../../android/app/google-services.json';
 import { styles } from './style';
-import type { AuthMode, ProfileActions, ProfileDialog, ThemePreference, } from './type';
+import type {
+  FirebaseGoogleServicesConfig,
+  ProfileActions,
+  ProfileDialog,
+  ThemePreference,
+} from './type';
+
+const firebaseGoogleServices =
+  googleServicesConfig as FirebaseGoogleServicesConfig;
+const googleWebClientId = firebaseGoogleServices.client
+  .flatMap(client => client.oauth_client ?? [])
+  .find(client => client.client_type === 3)?.client_id;
 
 function getErrorMessage(error: unknown) {
   if (typeof error === 'object' && error !== null && 'code' in error) {
@@ -13,6 +37,8 @@ function getErrorMessage(error: unknown) {
       'auth/email-already-in-use': 'Bu e-posta adresi zaten kullanılıyor.',
       'auth/invalid-credential': 'E-posta veya şifre hatalı.',
       'auth/invalid-email': 'Geçerli bir e-posta adresi girin.',
+      'auth/account-exists-with-different-credential':
+        'Bu e-posta farklı bir giriş yöntemiyle kayıtlı.',
       'auth/requires-recent-login':
         'Bu işlem için yeniden giriş yapmanız gerekiyor.',
       'auth/too-many-requests':
@@ -45,17 +71,17 @@ export function useProfileActions(): ProfileActions {
   const [themePreference, setThemePreference] =
     useState<ThemePreference>('system');
   const [dialog, setDialog] = useState<ProfileDialog>(null);
-  const [authMode, setAuthMode] = useState<AuthMode>('signIn');
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState('');
   const [isBusy, setIsBusy] = useState(false);
   const [language, setLanguage] = useState('Türkçe');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [message, setMessage] = useState('');
 
   useEffect(() => onAuthStateChanged(auth, setUser), [auth]);
+  useEffect(() => {
+    GoogleSignin.configure(
+      googleWebClientId ? { webClientId: googleWebClientId } : {},
+    );
+  }, []);
 
   const isDark =
     themePreference === 'dark' ||
@@ -68,37 +94,38 @@ export function useProfileActions(): ProfileActions {
         ? 'Koyu'
         : 'Açık';
 
-  const openAuthentication = (mode: AuthMode) => {
-    setAuthMode(mode);
-    setAuthError('');
-    setDialog('auth');
-  };
+  const handleGoogleSignIn = async () => {
+    if (!googleWebClientId) {
+      setMessage(
+        'Google ile giriş için Firebase Console’da Google sağlayıcısını etkinleştirip web OAuth istemcisi içeren google-services.json dosyasını yenileyin.',
+      );
+      return;
+    }
 
-  const handleAuthentication = async () => {
     setIsBusy(true);
-    setAuthError('');
 
     try {
-      if (authMode === 'createAccount') {
-        const credential = await createUserWithEmailAndPassword(
-          auth,
-          email.trim(),
-          password,
-        );
-        const name = fullName.trim();
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      const response = await GoogleSignin.signIn();
 
-        if (name) {
-          await updateProfile(credential.user, { displayName: name });
-          setUser(credential.user);
-        }
-      } else {
-        await signInWithEmailAndPassword(auth, email.trim(), password);
+      if (!isSuccessResponse(response)) {
+        return;
       }
 
-      setPassword('');
-      setDialog(null);
+      if (!response.data.idToken) {
+        throw new Error(
+          'Google ile giriş için Firebase projenizde Google sağlayıcısını etkinleştirip web istemci kimliğini GoogleSignin yapılandırmasına ekleyin.',
+        );
+      }
+
+      await signInWithCredential(
+        auth,
+        GoogleAuthProvider.credential(response.data.idToken),
+      );
     } catch (error) {
-      setAuthError(getErrorMessage(error));
+      setMessage(getErrorMessage(error));
     } finally {
       setIsBusy(false);
     }
@@ -148,13 +175,6 @@ export function useProfileActions(): ProfileActions {
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
-  };
-
-  const handleAuthModeToggle = () => {
-    setAuthMode(current =>
-      current === 'signIn' ? 'createAccount' : 'signIn',
-    );
-    setAuthError('');
   };
 
   const handleNotificationsChange = (enabled: boolean) => {
@@ -207,27 +227,16 @@ export function useProfileActions(): ProfileActions {
     themePreference,
     themeLabel,
     dialog,
-    authMode,
-    fullName,
-    email,
-    password,
-    authError,
     isBusy,
     language,
     notificationsEnabled,
     message,
-    setFullName,
-    setEmail,
-    setPassword,
-    openCreateAccount: () => openAuthentication('createAccount'),
-    openSignIn: () => openAuthentication('signIn'),
-    handleAuthentication,
+    openSignIn: handleGoogleSignIn,
     handleSignOut,
     handleDeleteAccount,
     handleOpenDeviceSettings,
     handleThemeChange,
     handleLanguageChange,
-    handleAuthModeToggle,
     handleNotificationsChange,
     dismissDialog,
     dismissMessage,

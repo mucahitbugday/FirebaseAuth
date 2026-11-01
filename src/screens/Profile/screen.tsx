@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Avatar, Button, Dialog, Divider, HelperText, Icon, List, PaperProvider, Portal, RadioButton, Snackbar, Text, TextInput, } from 'react-native-paper';
+import { Appbar, Avatar, Button, Dialog, Divider, Icon, List, PaperProvider, Portal, RadioButton, Snackbar, Text, } from 'react-native-paper';
 import { useProfileActions } from './action';
 import { styles } from './style';
 
@@ -9,11 +9,10 @@ export default function ProfileScreen() {
 
   return (
     <PaperProvider theme={profile.theme}>
+      <Appbar.Header>
+        <Appbar.Content title="Profil" />
+      </Appbar.Header>
       <ScrollView style={[styles.screen, { backgroundColor: profile.theme.colors.background }]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} >
-        <Text variant="headlineSmall" style={styles.pageTitle}>
-          Profilim
-        </Text>
-
         <View style={styles.profileHeader}>
           {profile.user?.photoURL ? (
             <Avatar.Image
@@ -54,13 +53,16 @@ export default function ProfileScreen() {
           ) : (
             <>
               <Text variant="titleMedium" style={styles.profileName}>
-                Hesap oluştur / Giriş yap
+                Profil bilgilerinizi görmek için giriş yapın
               </Text>
               <View style={styles.authButtons}>
-                <Button mode="contained" onPress={profile.openCreateAccount}>
-                  Hesap oluştur
-                </Button>
-                <Button mode="text" onPress={profile.openSignIn}>
+                <Button
+                  mode="contained"
+                  icon="google"
+                  onPress={profile.openSignIn}
+                  loading={profile.isBusy}
+                  disabled={profile.isBusy}
+                >
                   Giriş yap
                 </Button>
               </View>
@@ -138,73 +140,6 @@ export default function ProfileScreen() {
       </ScrollView>
 
       <Portal>
-        <Dialog
-          visible={profile.dialog === 'auth'}
-          onDismiss={profile.dismissDialog}
-          dismissable={!profile.isBusy}
-        >
-          <Dialog.Title>
-            {profile.authMode === 'createAccount'
-              ? 'Hesap oluştur'
-              : 'Giriş yap'}
-          </Dialog.Title>
-          <Dialog.Content>
-            {profile.authMode === 'createAccount' ? (
-              <TextInput
-                label="Ad soyad"
-                value={profile.fullName}
-                onChangeText={profile.setFullName}
-                autoCapitalize="words"
-                mode="outlined"
-                style={styles.input}
-              />
-            ) : null}
-            <TextInput
-              label="E-posta"
-              value={profile.email}
-              onChangeText={profile.setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              mode="outlined"
-              style={styles.input}
-            />
-            <TextInput
-              label="Şifre"
-              value={profile.password}
-              onChangeText={profile.setPassword}
-              secureTextEntry
-              autoComplete={
-                profile.authMode === 'createAccount'
-                  ? 'new-password'
-                  : 'current-password'
-              }
-              mode="outlined"
-              style={styles.input}
-            />
-            {profile.authError ? (
-              <HelperText type="error">{profile.authError}</HelperText>
-            ) : null}
-            <Button mode="text" onPress={profile.handleAuthModeToggle}>
-              {profile.authMode === 'signIn'
-                ? 'Hesabın yok mu? Hesap oluştur'
-                : 'Zaten hesabın var mı? Giriş yap'}
-            </Button>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={profile.dismissDialog} disabled={profile.isBusy}>
-              Vazgeç
-            </Button>
-            <Button
-              onPress={profile.handleAuthentication}
-              loading={profile.isBusy}
-              disabled={profile.isBusy}
-            >
-              {profile.authMode === 'createAccount' ? 'Oluştur' : 'Giriş yap'}
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-
         <Dialog
           visible={profile.dialog === 'theme'}
           onDismiss={profile.dismissDialog}

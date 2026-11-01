@@ -1,19 +1,38 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileScreen from './src/screens/Profile';
-import MainScreen from './src/screens/Main';
 import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, PaperProvider } from 'react-native-paper';
+import { StatusBar, useColorScheme } from 'react-native';
 
 export default function App() {
-
+  const mode = useColorScheme();
+  const isDarkMode = mode === 'dark';
   const Stack = createNativeStackNavigator();
 
+  const theme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      primary: '#6200ee',
+      accent: '#03dac4',
+      background: '#f6f6f6',
+      surface: '#ffffff',
+      text: '#000000',
+      disabled: '#f0f0f0',
+      placeholder: '#a1a1a1',
+      backdrop: '#000000',
+    },
+  };
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Main">
-        <Stack.Screen name="Main" component={MainScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <PaperProvider theme={theme}>
+      <NavigationContainer>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <Stack.Navigator initialRouteName="Profile" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
   )
 }
