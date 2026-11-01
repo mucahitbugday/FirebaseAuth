@@ -4,120 +4,72 @@ export const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  content: {
+    alignSelf: 'center',
+    maxWidth: 560,
+    paddingBottom: 28,
+    paddingHorizontal: 20,
+    width: '100%',
+  },
+  pageTitle: {
+    fontWeight: '700',
+    marginBottom: 24,
+    marginTop: 16,
+  },
   profileHeader: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 24,
-    overflow: 'hidden',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 14,
+    marginBottom: 30,
   },
-  profileAvatar: {
-    width: 76,
-    height: 76,
+  avatarPlaceholder: {
     alignItems: 'center',
+    borderRadius: 52,
+    height: 104,
     justifyContent: 'center',
-    borderRadius: 28,
-    marginBottom: 4,
+    marginBottom: 14,
+    width: 104,
   },
- 
-  profileTitle: {
+  profileName: {
     fontWeight: '700',
     textAlign: 'center',
   },
-  signInButton: {
-    borderRadius: 28,
-    minWidth: 92,
+  profileEmail: {
+    marginTop: 4,
+    textAlign: 'center',
   },
-  signInButtonContent: {
-    minHeight: 46,
-  },
-  promoCard: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  promoCardDark: {
-    backgroundColor: '#713900',
-  },
-  promoCardLight: {
-    backgroundColor: '#C45A00',
-  },
-  promoContent: {
+  authButtons: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 12,
-    minHeight: 88,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    gap: 8,
+    marginTop: 12,
   },
-  plusBadge: {
-    alignItems: 'center',
-    borderRadius: 28,
-    justifyContent: 'center',
-    minWidth: 70,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+  listSection: {
+    marginHorizontal: -8,
   },
-  plusBadgeText: {
-    fontWeight: '800',
-  },
-  promoTitle: {
-    color: '#FFFFFF',
+  sectionTitle: {
     fontWeight: '700',
   },
-  promoText: {
-    flex: 1,
-    gap: 3,
-  },
-  promoDescription: {
-    color: '#FFFFFF',
-  },
-  widgetCard: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  widgetContent: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 14,
-    minHeight: 112,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-  },
-  widgetEmoji: {
-    fontSize: 42,
-  },
-  widgetText: {
-    flex: 1,
-    gap: 3,
-  },
-  mutedText: {
-    opacity: 0.68,
-  },
-  menuGroup: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  menuItem: {
-    // minHeight: 74,
-  },
-  rowTitle: {
-    fontWeight: '600',
-  },
-  separator: {
-    paddingLeft: 60,
-  },
-  separatorLine: {
-    height: StyleSheet.hairlineWidth,
+  divider: {
+    marginLeft: 56,
   },
   trailingValue: {
     alignItems: 'center',
     flexDirection: 'row',
+    gap: 4,
+  },
+  trailingLabel: {
+    opacity: 0.72,
+  },
+  accountActions: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#80808055',
+    marginTop: 20,
+    paddingTop: 12,
   },
   versionText: {
     alignSelf: 'center',
-    marginTop: 2,
+    marginTop: 20,
+  },
+  input: {
     marginBottom: 12,
-    opacity: 0.65,
   },
 });
