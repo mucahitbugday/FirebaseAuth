@@ -3,14 +3,12 @@ import type { User } from '@react-native-firebase/auth';
 import type { ComponentProps } from 'react';
 import type { Icon, ListItemProps } from 'react-native-paper';
 import type { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
-import type { RootStackParamList } from '../Auth/type';
 
-export type { RootStackParamList } from '../Auth/type';
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ProfileDialog = 'theme' | 'language' | 'delete' | 'privacy' | null;
 
 export type ProfileScreenProps = NativeStackScreenProps<
-  RootStackParamList,
+  { Profile: undefined },
   'Profile'
 >;
 

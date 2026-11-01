@@ -3,21 +3,27 @@ import { Linking, useColorScheme, View } from 'react-native';
 import {
   deleteUser,
   getAuth,
+  GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithCredential,
   signOut,
   type User,
 } from '@react-native-firebase/auth';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+} from '@react-native-google-signin/google-signin';
 import { Icon, MD3DarkTheme, MD3LightTheme, Switch, Text } from 'react-native-paper';
 import type { ListItemProps } from 'react-native-paper';
 import { styles } from './style';
 import type {
   ProfileActions,
   ProfileDialog,
-  RootStackParamList,
   ThemePreference,
 } from './type';
+
+const googleWebClientId =
+  '1042236754290-8a14k9fovaefcbjqoqpu4dbbjbv52e6e.apps.googleusercontent.com';
 
 function getErrorMessage(error: unknown) {
   if (
@@ -35,8 +41,6 @@ function getErrorMessage(error: unknown) {
 export function useProfileActions(): ProfileActions {
   const systemColorScheme = useColorScheme();
   const auth = useMemo(() => getAuth(), []);
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Profile'>>();
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [themePreference, setThemePreference] =
     useState<ThemePreference>('system');
@@ -46,7 +50,10 @@ export function useProfileActions(): ProfileActions {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [message, setMessage] = useState('');
 
-  useEffect(() => onAuthStateChanged(auth, setUser), [auth]);
+  useEffect(() => {
+    GoogleSignin.configure({ webClientId: googleWebClientId });
+    return onAuthStateChanged(auth, setUser);
+  }, [auth]);
 
   const isDark =
     themePreference === 'dark' ||
@@ -64,6 +71,47 @@ export function useProfileActions(): ProfileActions {
       await signOut(auth);
     } catch (error) {
       setMessage(getErrorMessage(error));
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsBusy(true);
+    setMessage('');
+
+    try {
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      const response = await GoogleSignin.signIn();
+
+      if (!isSuccessResponse(response)) {
+        return;
+      }
+
+      if (!response.data.idToken) {
+        throw new Error(
+          'Google oturum açma işlemi bir kimlik belirteci döndürmedi.',
+        );
+      }
+
+      await signInWithCredential(
+        auth,
+        GoogleAuthProvider.credential(response.data.idToken),
+      );
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error.code === 'SIGN_IN_CANCELLED' ||
+          error.code === '12501' ||
+          error.code === 'ERROR_CANCELED')
+      ) {
+        return;
+      }
+      setMessage(getErrorMessage(error));
+    } finally {
+      setIsBusy(false);
     }
   };
 
@@ -140,7 +188,7 @@ export function useProfileActions(): ProfileActions {
     language,
     notificationsEnabled,
     message,
-    openSignIn: () => navigation.navigate('Auth'),
+    openSignIn: handleGoogleSignIn,
     handleSignOut,
     handleDeleteAccount,
     handleOpenDeviceSettings,
