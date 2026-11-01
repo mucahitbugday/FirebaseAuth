@@ -1,39 +1,22 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
 import { Linking, useColorScheme } from 'react-native';
-import {
-  deleteUser,
-  getAuth,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithCredential,
-  signOut,
-  type User,
-} from '@react-native-firebase/auth';
-import {
-  GoogleSignin,
-  isSuccessResponse,
-} from '@react-native-google-signin/google-signin';
+import { deleteUser, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signOut, type User, } from '@react-native-firebase/auth';
+import { GoogleSignin, isSuccessResponse, } from '@react-native-google-signin/google-signin';
 import { Icon, MD3DarkTheme, MD3LightTheme, Switch, Text, } from 'react-native-paper';
 import type { ListItemProps } from 'react-native-paper';
 import { View } from 'react-native';
-import googleServicesConfig from '../../../android/app/google-services.json';
 import { styles } from './style';
-import type {
-  FirebaseGoogleServicesConfig,
-  ProfileActions,
-  ProfileDialog,
-  ThemePreference,
-} from './type';
+import type { ProfileActions, ProfileDialog, ThemePreference, } from './type';
 
-const firebaseGoogleServices =
-  googleServicesConfig as FirebaseGoogleServicesConfig;
-const googleWebClientId = firebaseGoogleServices.client
-  .flatMap(client => client.oauth_client ?? [])
-  .find(client => client.client_type === 3)?.client_id;
+const googleWebClientId = '1042236754290-8a14k9fovaefcbjqoqpu4dbbjbv52e6e.apps.googleusercontent.com'
 
 function getErrorMessage(error: unknown) {
   if (typeof error === 'object' && error !== null && 'code' in error) {
     const messages: Record<string, string> = {
+      '10':
+        'Google Sign-In yapılandırma hatası. Firebase Console’da com.firebaseauth Android uygulamasına imza SHA-1/SHA-256 değerlerini ekleyin, Google giriş sağlayıcısını etkinleştirin ve güncel google-services.json dosyasını indirip uygulamayı yeniden derleyin.',
+      DEVELOPER_ERROR:
+        'Google Sign-In yapılandırma hatası. Firebase Console’da com.firebaseauth Android uygulamasına imza SHA-1/SHA-256 değerlerini ekleyin, Google giriş sağlayıcısını etkinleştirin ve güncel google-services.json dosyasını indirip uygulamayı yeniden derleyin.',
       'auth/email-already-in-use': 'Bu e-posta adresi zaten kullanılıyor.',
       'auth/invalid-credential': 'E-posta veya şifre hatalı.',
       'auth/invalid-email': 'Geçerli bir e-posta adresi girin.',
@@ -115,9 +98,7 @@ export function useProfileActions(): ProfileActions {
       }
 
       if (!response.data.idToken) {
-        throw new Error(
-          'Google ile giriş için Firebase projenizde Google sağlayıcısını etkinleştirip web istemci kimliğini GoogleSignin yapılandırmasına ekleyin.',
-        );
+        throw new Error('Google oturum açma işlemi bir kimlik belirteci döndürmedi.');
       }
 
       await signInWithCredential(
@@ -125,6 +106,7 @@ export function useProfileActions(): ProfileActions {
         GoogleAuthProvider.credential(response.data.idToken),
       );
     } catch (error) {
+      console.error('Google Sign-In Error:', error);
       setMessage(getErrorMessage(error));
     } finally {
       setIsBusy(false);

@@ -19,10 +19,14 @@ export type ProfileStackParamList = {
 
 export interface FirebaseGoogleServicesConfig {
   client: Array<{
-    oauth_client?: Array<{
-      client_id: string;
-      client_type: number;
-    }>;
+    services?: {
+      appinvite_service?: {
+        other_platform_oauth_client?: Array<{
+          client_id: string;
+          client_type: number;
+        }>;
+      };
+    };
   }>;
 }
 
