@@ -1,6 +1,8 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileScreen from './src/screens/Profile';
+import AuthScreen from './src/screens/Auth';
+import type { RootStackParamList } from './src/screens/Auth';
 import { NavigationContainer } from '@react-navigation/native';
 import { DefaultTheme, PaperProvider } from 'react-native-paper';
 import { StatusBar, useColorScheme } from 'react-native';
@@ -8,7 +10,7 @@ import { StatusBar, useColorScheme } from 'react-native';
 export default function App() {
   const mode = useColorScheme();
   const isDarkMode = mode === 'dark';
-  const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator<RootStackParamList>();
 
   const theme = {
     ...DefaultTheme,
@@ -31,6 +33,7 @@ export default function App() {
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <Stack.Navigator initialRouteName="Profile" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="Auth" component={AuthScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

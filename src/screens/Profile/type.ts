@@ -3,35 +3,14 @@ import type { User } from '@react-native-firebase/auth';
 import type { ComponentProps } from 'react';
 import type { Icon, ListItemProps } from 'react-native-paper';
 import type { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import type { RootStackParamList } from '../Auth/type';
 
+export type { RootStackParamList } from '../Auth/type';
 export type ThemePreference = 'system' | 'light' | 'dark';
-export type ProfileDialog =
-  | 'theme'
-  | 'language'
-  | 'delete'
-  | 'privacy'
-  | null;
-
-export type ProfileStackParamList = {
-  Main: undefined;
-  Profile: undefined;
-};
-
-export interface FirebaseGoogleServicesConfig {
-  client: Array<{
-    services?: {
-      appinvite_service?: {
-        other_platform_oauth_client?: Array<{
-          client_id: string;
-          client_type: number;
-        }>;
-      };
-    };
-  }>;
-}
+export type ProfileDialog = 'theme' | 'language' | 'delete' | 'privacy' | null;
 
 export type ProfileScreenProps = NativeStackScreenProps<
-  ProfileStackParamList,
+  RootStackParamList,
   'Profile'
 >;
 
@@ -51,7 +30,6 @@ export interface ProfileActions {
   handleOpenDeviceSettings: () => Promise<void>;
   handleThemeChange: (value: string) => void;
   handleLanguageChange: (value: string) => void;
-  handleNotificationsChange: (enabled: boolean) => void;
   dismissDialog: () => void;
   dismissMessage: () => void;
   openThemeDialog: () => void;

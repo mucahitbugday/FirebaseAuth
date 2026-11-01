@@ -1,6 +1,19 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Avatar, Button, Dialog, Divider, Icon, List, PaperProvider, Portal, RadioButton, Snackbar, Text, } from 'react-native-paper';
+import {
+  Appbar,
+  Avatar,
+  Button,
+  Dialog,
+  Divider,
+  Icon,
+  List,
+  PaperProvider,
+  Portal,
+  RadioButton,
+  Snackbar,
+  Text,
+} from 'react-native-paper';
 import { useProfileActions } from './action';
 import { styles } from './style';
 
@@ -12,7 +25,11 @@ export default function ProfileScreen() {
       <Appbar.Header>
         <Appbar.Content title="Profil" />
       </Appbar.Header>
-      <ScrollView style={[styles.screen, { backgroundColor: profile.theme.colors.background }]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} >
+      <ScrollView
+        style={[styles.screen, { backgroundColor: profile.theme.colors.background }]}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.profileHeader}>
           {profile.user?.photoURL ? (
             <Avatar.Image
@@ -56,13 +73,7 @@ export default function ProfileScreen() {
                 Profil bilgilerinizi görmek için giriş yapın
               </Text>
               <View style={styles.authButtons}>
-                <Button
-                  mode="contained"
-                  icon="google"
-                  onPress={profile.openSignIn}
-                  loading={profile.isBusy}
-                  disabled={profile.isBusy}
-                >
+                <Button mode="contained" icon="google" onPress={profile.openSignIn}>
                   Giriş yap
                 </Button>
               </View>
@@ -230,8 +241,6 @@ export default function ProfileScreen() {
       >
         {profile.message}
       </Snackbar>
-
-
     </PaperProvider>
   );
 }

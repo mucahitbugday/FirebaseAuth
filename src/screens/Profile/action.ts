@@ -1,40 +1,25 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
-import { Linking, useColorScheme } from 'react-native';
-import { deleteUser, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signOut, type User, } from '@react-native-firebase/auth';
-import { GoogleSignin, isSuccessResponse, } from '@react-native-google-signin/google-signin';
-import { Icon, MD3DarkTheme, MD3LightTheme, Switch, Text, } from 'react-native-paper';
+import { Linking, useColorScheme, View } from 'react-native';
+import {
+  deleteUser,
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+  type User,
+} from '@react-native-firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Icon, MD3DarkTheme, MD3LightTheme, Switch, Text } from 'react-native-paper';
 import type { ListItemProps } from 'react-native-paper';
-import { View } from 'react-native';
 import { styles } from './style';
-import type { ProfileActions, ProfileDialog, ThemePreference, } from './type';
-
-const googleWebClientId = '1042236754290-8a14k9fovaefcbjqoqpu4dbbjbv52e6e.apps.googleusercontent.com'
+import type {
+  ProfileActions,
+  ProfileDialog,
+  RootStackParamList,
+  ThemePreference,
+} from './type';
 
 function getErrorMessage(error: unknown) {
-  if (typeof error === 'object' && error !== null && 'code' in error) {
-    const messages: Record<string, string> = {
-      '10':
-        'Google Sign-In yapılandırma hatası. Firebase Console’da com.firebaseauth Android uygulamasına imza SHA-1/SHA-256 değerlerini ekleyin, Google giriş sağlayıcısını etkinleştirin ve güncel google-services.json dosyasını indirip uygulamayı yeniden derleyin.',
-      DEVELOPER_ERROR:
-        'Google Sign-In yapılandırma hatası. Firebase Console’da com.firebaseauth Android uygulamasına imza SHA-1/SHA-256 değerlerini ekleyin, Google giriş sağlayıcısını etkinleştirin ve güncel google-services.json dosyasını indirip uygulamayı yeniden derleyin.',
-      'auth/email-already-in-use': 'Bu e-posta adresi zaten kullanılıyor.',
-      'auth/invalid-credential': 'E-posta veya şifre hatalı.',
-      'auth/invalid-email': 'Geçerli bir e-posta adresi girin.',
-      'auth/account-exists-with-different-credential':
-        'Bu e-posta farklı bir giriş yöntemiyle kayıtlı.',
-      'auth/requires-recent-login':
-        'Bu işlem için yeniden giriş yapmanız gerekiyor.',
-      'auth/too-many-requests':
-        'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.',
-      'auth/weak-password': 'Şifre en az 6 karakter olmalıdır.',
-    };
-    const code = error.code;
-
-    if (typeof code === 'string' && messages[code]) {
-      return messages[code];
-    }
-  }
-
   if (
     typeof error === 'object' &&
     error !== null &&
@@ -50,6 +35,8 @@ function getErrorMessage(error: unknown) {
 export function useProfileActions(): ProfileActions {
   const systemColorScheme = useColorScheme();
   const auth = useMemo(() => getAuth(), []);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Profile'>>();
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [themePreference, setThemePreference] =
     useState<ThemePreference>('system');
@@ -60,11 +47,6 @@ export function useProfileActions(): ProfileActions {
   const [message, setMessage] = useState('');
 
   useEffect(() => onAuthStateChanged(auth, setUser), [auth]);
-  useEffect(() => {
-    GoogleSignin.configure(
-      googleWebClientId ? { webClientId: googleWebClientId } : {},
-    );
-  }, []);
 
   const isDark =
     themePreference === 'dark' ||
@@ -76,42 +58,6 @@ export function useProfileActions(): ProfileActions {
       : themePreference === 'dark'
         ? 'Koyu'
         : 'Açık';
-
-  const handleGoogleSignIn = async () => {
-    if (!googleWebClientId) {
-      setMessage(
-        'Google ile giriş için Firebase Console’da Google sağlayıcısını etkinleştirip web OAuth istemcisi içeren google-services.json dosyasını yenileyin.',
-      );
-      return;
-    }
-
-    setIsBusy(true);
-
-    try {
-      await GoogleSignin.hasPlayServices({
-        showPlayServicesUpdateDialog: true,
-      });
-      const response = await GoogleSignin.signIn();
-
-      if (!isSuccessResponse(response)) {
-        return;
-      }
-
-      if (!response.data.idToken) {
-        throw new Error('Google oturum açma işlemi bir kimlik belirteci döndürmedi.');
-      }
-
-      await signInWithCredential(
-        auth,
-        GoogleAuthProvider.credential(response.data.idToken),
-      );
-    } catch (error) {
-      console.error('Google Sign-In Error:', error);
-      setMessage(getErrorMessage(error));
-    } finally {
-      setIsBusy(false);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -155,52 +101,33 @@ export function useProfileActions(): ProfileActions {
     }
   };
 
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-  };
-
-  const handleNotificationsChange = (enabled: boolean) => {
-    setNotificationsEnabled(enabled);
-  };
-
-  const dismissDialog = () => {
-    setDialog(null);
-  };
-
-  const dismissMessage = () => {
-    setMessage('');
-  };
-
   const renderIcon: ProfileActions['renderIcon'] =
     name =>
-      ({ color }) =>
-        createElement(Icon, { source: name, size: 22, color });
+    ({ color }) =>
+      createElement(Icon, { source: name, size: 22, color });
 
   const renderTrailingValue: ProfileActions['renderTrailingValue'] = (
     value,
     showArrow = true,
   ) => () =>
-      createElement(
-        View,
-        { style: styles.trailingValue },
-        createElement(
-          Text,
-          {
-            variant: 'bodyMedium',
-            style: styles.trailingLabel,
-            children: value,
-          },
-        ),
-        showArrow
-          ? createElement(Icon, { source: 'chevron-right', size: 22 })
-          : null,
-      );
+    createElement(
+      View,
+      { style: styles.trailingValue },
+      createElement(Text, {
+        variant: 'bodyMedium',
+        style: styles.trailingLabel,
+        children: value,
+      }),
+      showArrow
+        ? createElement(Icon, { source: 'chevron-right', size: 22 })
+        : null,
+    );
 
   const renderNotificationsSwitch: NonNullable<ListItemProps['right']> =
     () =>
       createElement(Switch, {
         value: notificationsEnabled,
-        onValueChange: handleNotificationsChange,
+        onValueChange: setNotificationsEnabled,
       });
 
   return {
@@ -213,15 +140,14 @@ export function useProfileActions(): ProfileActions {
     language,
     notificationsEnabled,
     message,
-    openSignIn: handleGoogleSignIn,
+    openSignIn: () => navigation.navigate('Auth'),
     handleSignOut,
     handleDeleteAccount,
     handleOpenDeviceSettings,
     handleThemeChange,
-    handleLanguageChange,
-    handleNotificationsChange,
-    dismissDialog,
-    dismissMessage,
+    handleLanguageChange: setLanguage,
+    dismissDialog: () => setDialog(null),
+    dismissMessage: () => setMessage(''),
     openThemeDialog: () => setDialog('theme'),
     openLanguageDialog: () => setDialog('language'),
     openDeleteDialog: () => setDialog('delete'),

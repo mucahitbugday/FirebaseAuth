@@ -5,7 +5,8 @@ buildscript {
         compileSdkVersion = 37
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
-        kotlinVersion = "2.2.0"
+        // Firebase Auth metadata 2.4.0 uyumluluğu
+        kotlinVersion = "2.4.20"
     }
     repositories {
         google()
@@ -14,7 +15,9 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("com.google.gms:google-services:4.5.0")
+        // Kotlin sürümünü açıkça belirt
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
