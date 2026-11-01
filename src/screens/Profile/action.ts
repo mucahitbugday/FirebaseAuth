@@ -13,9 +13,12 @@ import {
   GoogleSignin,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Icon, MD3DarkTheme, MD3LightTheme, Switch, Text } from 'react-native-paper';
 import type { ListItemProps } from 'react-native-paper';
 import { styles } from './style';
+import type { RootStackParamList } from '../Auth/type';
 import type {
   ProfileActions,
   ProfileDialog,
@@ -41,6 +44,8 @@ function getErrorMessage(error: unknown) {
 export function useProfileActions(): ProfileActions {
   const systemColorScheme = useColorScheme();
   const auth = useMemo(() => getAuth(), []);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Profile'>>();
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [themePreference, setThemePreference] =
     useState<ThemePreference>('system');
@@ -189,6 +194,7 @@ export function useProfileActions(): ProfileActions {
     notificationsEnabled,
     message,
     openSignIn: handleGoogleSignIn,
+    openAuth: () => navigation.navigate('Auth'),
     handleSignOut,
     handleDeleteAccount,
     handleOpenDeviceSettings,

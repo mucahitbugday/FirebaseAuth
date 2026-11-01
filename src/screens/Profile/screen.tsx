@@ -148,6 +148,14 @@ export default function ProfileScreen() {
         >
           Sürüm 11.234
         </Text>
+        <Button
+          mode="outlined"
+          icon="account-key-outline"
+          onPress={profile.openAuth}
+          style={styles.authOptionsButton}
+        >
+          Diğer giriş yöntemleri
+        </Button>
       </ScrollView>
 
       <Portal>

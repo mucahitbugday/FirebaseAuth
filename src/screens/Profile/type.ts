@@ -23,6 +23,7 @@ export interface ProfileActions {
   notificationsEnabled: boolean;
   message: string;
   openSignIn: () => void;
+  openAuth: () => void;
   handleSignOut: () => Promise<void>;
   handleDeleteAccount: () => Promise<void>;
   handleOpenDeviceSettings: () => Promise<void>;
